@@ -72,7 +72,16 @@
 * Includes a built-in 1-click **Demo Role Switcher** in the top navigation bar to seamlessly present both attendee and organizer perspectives without logging in and out.
 * Organizers can create/publish events, view live attendance counters, and export attendee rosters as CSV.
 
-### 6. 🚀 DevOps, Dockerization & Infrastructure as Code (IaC)
+### 6. ☁️ Official AWS SDK v3 Integration & Dual-Mode Execution
+* **Amazon DynamoDB (`@aws-sdk/client-dynamodb` & `@aws-sdk/lib-dynamodb`)**: Real DynamoDB Document Client using `UpdateCommand` with `ConditionExpression: "available_seats > :zero"`.
+* **Amazon SQS (`@aws-sdk/client-sqs`)**: Dispatches registration messages to an AWS SQS queue with Dead-Letter Queue (DLQ) support.
+* **Amazon SES (`@aws-sdk/client-ses`)**: Dispatches HTML ticket confirmation emails.
+* **Amazon S3 (`@aws-sdk/client-s3`)**: Stores dynamic pass QR images in cloud object storage.
+* **AWS Lambda (`serverless-http`)**: `backend/src/lambda.js` wraps the entire Express engine for AWS Lambda + API Gateway deployment.
+* **Dual-Mode Graceful Fallback**: If AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) are provided in `.env`, the system interacts directly with live AWS Cloud. If absent, it automatically defaults to zero-cost local simulation mode without throwing runtime errors.
+* **AWS SAM & Serverless Framework**: Includes [`template.yaml`](template.yaml) and [`serverless.yml`](serverless.yml) for 1-command deployment to AWS.
+
+### 7. 🚀 DevOps, Dockerization & Infrastructure as Code (IaC)
 * **Docker Compose**: Containerized multi-container setup with frontend Nginx proxy and backend service.
 * **Terraform (`infrastructure/terraform/main.tf`)**: Complete AWS Infrastructure as Code specification including API Gateway, DynamoDB, SQS queues with DLQs, S3, and CloudFront.
 * **GitHub Actions (`.github/workflows/ci.yml`)**: Continuous integration workflow validating builds on push.

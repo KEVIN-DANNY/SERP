@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SERP - Serverless Event Registration Portal SAM Template
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: nodejs20.x
+    Environment:
+      Variables:
+        NODE_ENV: production
+        JWT_SECRET: serp_cloud_secret_key_2026_super_secure_jwt_token
+        DYNAMODB_EVENTS_TABLE: !Ref EventsTable
+        DYNAMODB_REGISTRATIONS_TABLE: !Ref RegistrationsTable
+        AWS_SQS_QUEUE_URL: !Ref TicketQueue
+
+Resources:
+  # 1. API Gateway HTTP API
+  SerpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - '*'
+        AllowOrigins:
+          - '*'
+
+  # 2. Serverless Express Lambda Function
+  SerpApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/lambda.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref EventsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RegistrationsTable
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt TicketQueue.QueueName
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref SerpApi
+            Path: /{proxy+}
+            Method: ANY
+
+  # 3. DynamoDB Tables
+  EventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: serp-events-production
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  RegistrationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: serp-registrations-production
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: ticket_code
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: TicketCodeIndex
+          KeySchema:
+            - AttributeName: ticket_code
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # 4. Amazon SQS Queue
+  TicketQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: serp-ticket-queue-production
+      VisibilityTimeout: 60
+
+Outputs:
+  ApiUrl:
+    Description: HTTP API endpoint URL
+    Value: !Sub "https://${SerpApi}.execute-api.${AWS::Region}.amazonaws.com"

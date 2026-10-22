@@ -51,6 +51,7 @@ export default function CloudMetrics() {
 
   const telemetry = data?.telemetry;
   const cloudQueue = data?.cloudQueue;
+  const aws = data?.awsIntegration;
 
   return (
     <div className="page-container">
@@ -100,8 +101,8 @@ export default function CloudMetrics() {
 
           <div className="arch-node">
             <span className="node-title">Persistence</span>
-            <div className="node-name">ACID Database</div>
-            <div className="node-detail">WAL Journaling Mode</div>
+            <div className="node-name">DynamoDB / ACID DB</div>
+            <div className="node-detail">Conditional Writes</div>
           </div>
 
           <span className="arch-arrow">→</span>
@@ -110,6 +111,44 @@ export default function CloudMetrics() {
             <span className="node-title">Async Worker</span>
             <div className="node-name">AWS SQS + SES</div>
             <div className="node-detail">Decoupled Queue Worker</div>
+          </div>
+        </div>
+      </div>
+
+      {/* AWS Cloud Services Integration Status */}
+      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Cloud size={18} color="#f59e0b" /> Official AWS Cloud Services Integration (@aws-sdk/v3)
+          </h3>
+          <span style={{ fontSize: '0.8rem', background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '20px', fontWeight: 600 }}>
+            {aws?.connected ? 'Live AWS Cloud Active' : 'Dual-Mode Active: Seamless Zero-Cost Local Simulation'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.85rem' }}>
+          <div style={{ background: '#fff', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <small style={{ color: '#64748b', display: 'block' }}>NoSQL Database</small>
+            <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>Amazon DynamoDB</strong>
+            <p style={{ fontSize: '0.75rem', color: '#4f46e5', marginTop: '2px' }}>Atomic ConditionExpression</p>
+          </div>
+
+          <div style={{ background: '#fff', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <small style={{ color: '#64748b', display: 'block' }}>Decoupled Messaging</small>
+            <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>Amazon SQS</strong>
+            <p style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '2px' }}>Dead-Letter Queue Support</p>
+          </div>
+
+          <div style={{ background: '#fff', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <small style={{ color: '#64748b', display: 'block' }}>Serverless Compute</small>
+            <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>AWS Lambda</strong>
+            <p style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '2px' }}>serverless-http Gateway Ready</p>
+          </div>
+
+          <div style={{ background: '#fff', padding: '0.85rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <small style={{ color: '#64748b', display: 'block' }}>Notification Engine</small>
+            <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>Amazon SES & S3</strong>
+            <p style={{ fontSize: '0.75rem', color: '#0284c7', marginTop: '2px' }}>Automated Pass Delivery</p>
           </div>
         </div>
       </div>

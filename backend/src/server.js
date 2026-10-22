@@ -25,13 +25,21 @@ app.use(express.json());
 // Attach Cloud Telemetry & Observability Middleware
 app.use(telemetryService.middleware());
 
+const { hasAwsCredentials, region } = require('./aws/awsConfig');
+
 // API Health Check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'UP',
     service: 'SERP Microservice Engine',
     timestamp: new Date().toISOString(),
-    architecture: 'Cloud-Native Distributed Event Platform'
+    architecture: 'Cloud-Native Distributed Event Platform',
+    awsIntegration: {
+      active: hasAwsCredentials,
+      region,
+      driver: hasAwsCredentials ? 'Live AWS Cloud SDK (DynamoDB + SQS + SES + S3)' : 'Local Zero-Cost Cloud Simulation',
+      serverlessLambdaReady: true
+    }
   });
 });
 
@@ -51,14 +59,20 @@ app.use((err, req, res, next) => {
   });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 SERP Serverless Backend running on http://localhost:${PORT}`);
-  console.log(`📡 Cloud Telemetry: http://localhost:${PORT}/api/metrics`);
-  console.log(`⚡ Concurrency Stress Engine ready`);
-  console.log(`====================================================`);
-});
+let server = null;
+if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  server = app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`🚀 SERP Serverless Backend running on http://localhost:${PORT}`);
+    console.log(`📡 Cloud Telemetry: http://localhost:${PORT}/api/metrics`);
+    console.log(`⚡ Concurrency Stress Engine ready`);
+    console.log(`☁️  AWS Cloud Integration: ${hasAwsCredentials ? 'LIVE AWS ACTIVE' : 'SIMULATION MODE (Set AWS keys in .env for live AWS)'}`);
+    console.log(`====================================================`);
+  });
 
-server.on('error', (err) => {
-  console.error(`Failed to start server on port ${PORT}:`, err.message);
-});
+  server.on('error', (err) => {
+    console.error(`Failed to start server on port ${PORT}:`, err.message);
+  });
+}
+
+module.exports = { app, server };

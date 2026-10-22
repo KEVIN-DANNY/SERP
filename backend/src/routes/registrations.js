@@ -5,6 +5,9 @@ const db = require('../db');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { generateTicketQR, verifyTicketQR } = require('../services/qrService');
 const queueService = require('../services/queueService');
+const dynamoService = require('../aws/dynamoService');
+const s3Service = require('../aws/s3Service');
+const { hasAwsCredentials } = require('../aws/awsConfig');
 
 // Create a new Registration with ACID Atomic Locking
 router.post('/', authenticate, async (req, res) => {
@@ -83,8 +86,24 @@ router.post('/', authenticate, async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'CONFIRMED')
     `).run(regId, ticketCode, event.id, userId, userName, userEmail, qrToken, qrImage);
 
-    // 4. Dispatch to Asynchronous Cloud Queue (SQS / SES worker simulation)
-    const queueJob = queueService.enqueueNotification({
+    // Optional AWS Cloud Sync (DynamoDB & S3)
+    if (hasAwsCredentials) {
+      dynamoService.saveRegistration({
+        id: regId,
+        ticketCode,
+        eventId: event.id,
+        userId,
+        userName,
+        userEmail,
+        status: 'CONFIRMED'
+      }).catch(err => console.warn('[AWS DynamoDB Sync Warning]:', err.message));
+
+      s3Service.uploadTicketPass(ticketCode, qrImage)
+        .catch(err => console.warn('[AWS S3 Upload Warning]:', err.message));
+    }
+
+    // 4. Dispatch to Asynchronous Cloud Queue (AWS SQS / SES pipeline)
+    const queueJob = await queueService.enqueueNotification({
       recipientEmail: userEmail,
       eventId: event.id,
       eventTitle: event.title,
