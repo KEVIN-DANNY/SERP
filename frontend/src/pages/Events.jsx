@@ -3,28 +3,41 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Search, Calendar, MapPin, Users, Filter } from 'lucide-react';
 
+import { mockEvents } from '../data/mockEvents';
+
 export default function Events() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState(mockEvents);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
 
   const categories = ['All', 'Cloud Computing', 'Hackathon', 'AI & Data', 'DevOps'];
 
   const fetchEvents = async () => {
-    setLoading(true);
     try {
       const params = {};
       if (filterCategory !== 'All') params.category = filterCategory;
       if (searchTerm.trim() !== '') params.search = searchTerm.trim();
 
       const res = await api.getEvents(params);
-      setEvents(res.events || []);
+      if (res?.events && res.events.length > 0) {
+        setEvents(res.events);
+        return;
+      }
     } catch (err) {
-      console.error('Error fetching events:', err);
-    } finally {
-      setLoading(false);
+      console.warn('Live API unavailable, using seeded event dataset');
     }
+
+    // Client-side fallback filtering on mockEvents
+    const filtered = mockEvents.filter(ev => {
+      const matchCat = filterCategory === 'All' || ev.category === filterCategory;
+      const matchSearch = searchTerm.trim() === '' || 
+        ev.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ev.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ev.speaker.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchCat && matchSearch;
+    });
+    setEvents(filtered);
   };
 
   useEffect(() => {

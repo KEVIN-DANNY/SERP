@@ -167,6 +167,38 @@ function seedData() {
       'Samantha Torres (DevOps Principal)',
       'usr-organizer-1'
     );
+
+    insertEvent.run(
+      'evt-5',
+      'High-Performance Cloud Databases & DynamoDB Masterclass',
+      'Cloud Computing',
+      'December 12, 2026',
+      '01:00 PM - 5:00 PM',
+      'Computer Science Dept - Seminar Hall',
+      'Free',
+      60,
+      24,
+      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
+      'Master NoSQL data modeling, single-table design patterns in DynamoDB, global secondary indexes (GSI), and atomic conditional writes under heavy flash-sale load.',
+      'Dr. Arvind Narayanan (Cloud Systems Lead)',
+      'usr-organizer-1'
+    );
+
+    insertEvent.run(
+      'evt-6',
+      'Global FinTech & Cloud Computing Hackathon',
+      'Hackathon',
+      'December 20, 2026',
+      '10:00 AM - 8:00 PM',
+      'Tech Park Convention Center',
+      '$15',
+      80,
+      0, // Sold out event for presentation screenshots!
+      'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&q=80',
+      'Sold out 48-hour global hackathon testing serverless payment gateways, microservice resilience, and fraud prevention pipelines with $10,000 in cloud prizes.',
+      'FinTech Innovation Board',
+      'usr-organizer-1'
+    );
   }
 }
 

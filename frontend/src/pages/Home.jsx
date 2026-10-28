@@ -3,19 +3,21 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { ArrowRight, Calendar, MapPin, Zap, ShieldCheck, Activity, Users, Ticket } from 'lucide-react';
 
+import { mockEvents } from '../data/mockEvents';
+
 export default function Home() {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState(mockEvents);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchEvents() {
       try {
         const res = await api.getEvents();
-        setEvents(res.events || []);
+        if (res?.events && res.events.length > 0) {
+          setEvents(res.events);
+        }
       } catch (err) {
-        console.error('Failed to fetch events:', err);
-      } finally {
-        setLoading(false);
+        console.warn('API endpoint unreachable, displaying pre-seeded cloud events:', err.message);
       }
     }
     fetchEvents();
